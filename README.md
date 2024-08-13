@@ -9,6 +9,7 @@ go mod tidy // cleans up depednacies
 
 go get github.com/labstack/echo/v4
 go get github.com/labstack/echo/v4/middleware
+go install github.com/air-verse/air@latest
 
 # considerations
 
