@@ -13,29 +13,36 @@
 </head>
 
 <body>
-  {{ template "form" . }}
+  {{ template "form" .Form }}
   <hr />
-  {{ template "display" . }}
+  {{ template "display" .Data }}
 </body>
 
 </html>
 {{ end }}
+
 {{ block "form" . }}
-<form hx-post="/contacts">
-  <label for="name">Name</label>
-  <input name="name" placeholder="Name">
+<form hx-swap="outerHTML" hx-target="#contacts" hx-post="/contacts">
 
-  <label for="email">Email</label>
-  <input type="email" name="email" placeholder="Email">
+  name: <input {{ if .Values.name }} value="{{ .Values.name }}" {{ end }} type="text" name="name" placeholder="Name">
 
-  <button type="submit">Submit</button>
+  email: <input {{ if .Values.email }} value="{{ .Values.email }}" {{ end }} type="email" name="email"
+    placeholder="Email">
+  {{ if .Errors.email }}
+  <div style="color: red;">{{ .Errors.email }}</div>
+  {{ end }}
+
+  <button type="submit">Create Your Contact</button>
 </form>
 {{ end }}
+
 {{ block "display" . }}
-{{ range .Contacts }}
 <div>
-  Name: <span>{{ .Name }}</span>
-  Email: <span>{{ .Email }}</span>
+  {{ range .Contacts }}
+  <div id="contacts" style="display: flex; flex-direction: column;">
+    Name: <span>{{ .Name }}</span>
+    Email: <span>{{ .Email }}</span>
+  </div>
+  {{ end }}
 </div>
-{{ end }}
 {{ end }}

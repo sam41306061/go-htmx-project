@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 // calling templates
@@ -30,8 +29,19 @@ type Contact struct {
     Email string
 }
 
+type Contacts = []Contact
+
+func(d Data) hasEmail(email string) bool {
+    for _, contact := range d.Contacts {
+        if contact.Email == email {
+         return true
+        }
+    }
+    return false
+}
+
 type Data struct {
-    Contacts []Contact
+    Contacts Contacts
 }
 
 func NewData() *Data {
@@ -51,26 +61,56 @@ func NewContact(name, email string) Contact {
 }
 
 
+type FormData struct {
+    Values map[string]string
+    Errors map[string]string
+}
+
+func newFormData() FormData {
+    return FormData {
+        Values: make(map[string]string),
+        Errors: make(map[string]string),
+    }
+}
+
+// index page 
+type Page struct{
+    Data Data 
+    Form FormData
+}
+
+func newPage() Page {
+    return Page {
+        Data: *NewData(),
+        Form: newFormData(),
+    }
+}
 
 func main() {
 
     e := echo.New()
-
-    data := NewData()
-
+    page := newPage()
     e.Renderer = newTemplate()
-    e.Use(middleware.Logger())
 
     e.GET("/", func(c echo.Context) error {
-        return c.Render(200, "index.html", data)
-    })
-
+        return c.Render(200, "index", page)
+    }) 
+    // handles contact updating 
     e.POST("/contacts", func(c echo.Context) error {
         name := c.FormValue("name")
         email := c.FormValue("email")
 
-        data.Contacts = append(data.Contacts, NewContact(name, email))
-        return c.Render(200, "index.html", data)
+        if page.Data.hasEmail(email) {
+            formData := newFormData()
+            formData.Values["name"] = name 
+            formData.Values["email"] = email
+            formData.Errors["email"] = "Email already exists"
+
+            return c.Render(400, "form", formData)
+        }
+
+        page.Data.Contacts = append(page.Data.Contacts, NewContact(name, email))
+        return c.Render(200, "display", page)
     })
 
     e.Logger.Fatal(e.Start(":42069"))
