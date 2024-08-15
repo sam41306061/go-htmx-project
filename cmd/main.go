@@ -25,22 +25,53 @@ func newTemplate () *Templates {
 	}
 }
 
-type Count struct {
-	Count int
+type Contact struct {
+    Name  string
+    Email string
 }
 
-func main () {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	count:= Count {Count: 0}
-	e.Renderer = newTemplate()
+type Data struct {
+    Contacts []Contact
+}
 
-	e.GET("/", func(c echo.Context) error {
-		return c.Render(200, "index", count)
-	})
-	e.POST("/count", func(c echo.Context) error {
-		count.Count++
-		return c.Render(200, "count", count)
-	})
-	e.Logger.Fatal(e.Start(":42069"))
+func NewData() *Data {
+	return &Data{
+		Contacts: []Contact{
+			NewContact("Clara", "cd@gmail.com"),
+			NewContact("John", "jd@gmail.com"),
+		},
+	}
+}
+
+func NewContact(name, email string) Contact {
+    return Contact{
+        Name: name,
+        Email: email,
+    }
+}
+
+
+
+func main() {
+
+    e := echo.New()
+
+    data := NewData()
+
+    e.Renderer = newTemplate()
+    e.Use(middleware.Logger())
+
+    e.GET("/", func(c echo.Context) error {
+        return c.Render(200, "index.html", data)
+    })
+
+    e.POST("/contacts", func(c echo.Context) error {
+        name := c.FormValue("name")
+        email := c.FormValue("email")
+
+        data.Contacts = append(data.Contacts, NewContact(name, email))
+        return c.Render(200, "index.html", data)
+    })
+
+    e.Logger.Fatal(e.Start(":42069"))
 }

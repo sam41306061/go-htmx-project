@@ -1,21 +1,41 @@
 {{block "index" .}}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title></title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, inital-scale=1" />
-    <link href="css/style.css" rel="stylesheet" />
-    <script
-      src="https://unpkg.com/htmx.org@1.9.9"
-      integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
-      crossorigin="anonymous"
-    ></script>
-  </head>
-  <body>
-    <h1>CHECKOUT MY COUNT</h1>
-    <div id="count">{{ template "count" .}}</div>
-    <button hx-target="#count" hx-post="/count">Count ME PLEEEAAASSEE</button>
-  </body>
+
+<head>
+  <title></title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, inital-scale=1" />
+  <link href="css/style.css" rel="stylesheet" />
+  <script src="https://unpkg.com/htmx.org@1.9.9"
+    integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  {{ template "form" . }}
+  <hr />
+  {{ template "display" . }}
+</body>
+
 </html>
-{{ end }} {{ block "count" .}} Count {{ .Count }} {{ end }}
+{{ end }}
+{{ block "form" . }}
+<form hx-post="/contacts">
+  <label for="name">Name</label>
+  <input name="name" placeholder="Name">
+
+  <label for="email">Email</label>
+  <input type="email" name="email" placeholder="Email">
+
+  <button type="submit">Submit</button>
+</form>
+{{ end }}
+{{ block "display" . }}
+{{ range .Contacts }}
+<div>
+  Name: <span>{{ .Name }}</span>
+  Email: <span>{{ .Email }}</span>
+</div>
+{{ end }}
+{{ end }}
